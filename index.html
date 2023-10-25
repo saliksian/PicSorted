@@ -97,23 +97,49 @@
       const message = document.getElementById("message");
 
       // Function to capture and store a picture
-      function capturePicture() {
-        const folderName = folderInput.value || "Default";
-        if (!pictures[folderName]) {
-          pictures[folderName] = [];
-        }
+      // function capturePicture() {
+      //   const folderName = folderInput.value || "Default";
+      //   if (!pictures[folderName]) {
+      //     pictures[folderName] = [];
+      //   }
 
-        const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        canvas
-          .getContext("2d")
-          .drawImage(video, 0, 0, canvas.width, canvas.height);
-        const pictureDataUrl = canvas.toDataURL("image/png");
-        pictures[folderName].push(pictureDataUrl);
+      //   const canvas = document.createElement("canvas");
+      //   canvas.width = video.videoWidth;
+      //   canvas.height = video.videoHeight;
+      //   canvas
+      //     .getContext("2d")
+      //     .drawImage(video, 0, 0, canvas.width, canvas.height);
+      //   const pictureDataUrl = canvas.toDataURL("image/png");
+      //   pictures[folderName].push(pictureDataUrl);
 
-        showMessage("Picture captured!");
-      }
+      //   showMessage("Picture captured!");
+      // }
+
+      // Function to capture and store a picture with a geotag
+function capturePicture() {
+    const folderName = folderInput.value || 'Default';
+    if (!pictures[folderName]) {
+        pictures[folderName] = [];
+    }
+
+    const pictureCanvas = document.createElement('canvas');
+    pictureCanvas.width = video.videoWidth;
+    pictureCanvas.height = video.videoHeight;
+    pictureCanvas.getContext('2d').drawImage(video, 0, 0, pictureCanvas.width, pictureCanvas.height);
+    
+    // Add geotag
+    const geotag = 'Latitude: 123.456, Longitude: 789.012'; // Replace with the actual geotag
+    pictureCanvas.getContext('2d').fillStyle = 'white';
+    pictureCanvas.getContext('2d').font = '18px Arial';
+    pictureCanvas.getContext('2d').textAlign = 'end';
+    pictureCanvas.getContext('2d').textBaseline = 'bottom';
+    pictureCanvas.getContext('2d').fillText(geotag, pictureCanvas.width - 10, pictureCanvas.height - 10);
+    
+    const pictureDataUrl = pictureCanvas.toDataURL('image/png');
+    pictures[folderName].push(pictureDataUrl);
+    
+    showMessage('Picture captured with geotag!');
+}
 
       captureButton.addEventListener("click", capturePicture);
 

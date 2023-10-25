@@ -116,6 +116,7 @@
       // }
 
       // Function to capture and store a picture with a geotag
+      // Function to capture and store a picture with a geotag and timestamp
 function capturePicture() {
     const folderName = folderInput.value || 'Default';
     if (!pictures[folderName]) {
@@ -126,20 +127,32 @@ function capturePicture() {
     pictureCanvas.width = video.videoWidth;
     pictureCanvas.height = video.videoHeight;
     pictureCanvas.getContext('2d').drawImage(video, 0, 0, pictureCanvas.width, pictureCanvas.height);
-    
-    // Add geotag
-    const geotag = 'Latitude: 123.456, Longitude: 789.012'; // Replace with the actual geotag
-    pictureCanvas.getContext('2d').fillStyle = 'white';
-    pictureCanvas.getContext('2d').font = '18px Arial';
-    pictureCanvas.getContext('2d').textAlign = 'end';
-    pictureCanvas.getContext('2d').textBaseline = 'bottom';
-    pictureCanvas.getContext('2d').fillText(geotag, pictureCanvas.width - 10, pictureCanvas.height - 10);
-    
-    const pictureDataUrl = pictureCanvas.toDataURL('image/png');
-    pictures[folderName].push(pictureDataUrl);
-    
-    showMessage('Picture captured with geotag!');
+
+    // Get the live location (geotag) and timestamp
+    navigator.geolocation.getCurrentPosition((position) => {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const timestamp = new Date().toLocaleString();
+
+        // Create the geotag with location and timestamp
+        const geotag = `${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n ${timestamp}`;
+
+        // Add the geotag to the picture
+        pictureCanvas.getContext('2d').fillStyle = 'white';
+        pictureCanvas.getContext('2d').font = '18px Arial';
+        pictureCanvas.getContext('2d').textAlign = 'end';
+        pictureCanvas.getContext('2d').textBaseline = 'bottom';
+        pictureCanvas.getContext('2d').fillText(geotag, pictureCanvas.width - 10, pictureCanvas.height - 10);
+
+        const pictureDataUrl = pictureCanvas.toDataURL('image/png');
+        pictures[folderName].push(pictureDataUrl);
+
+        showMessage('Picture captured with geotag and timestamp!');
+    }, (error) => {
+        console.error('Error getting location:', error);
+    });
 }
+
 
       captureButton.addEventListener("click", capturePicture);
 

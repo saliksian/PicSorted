@@ -164,7 +164,7 @@
 
       // Access the user's camera and display the video stream
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({ video: { facingMode: 'environment' }})
         .then((stream) => {
           video.srcObject = stream;
         })

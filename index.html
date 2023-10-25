@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+    />
+    <title>Real-time Picture Capture with Folders</title>
+    <style>
+      body {
+        text-align: center;
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
+      h1 {
+        color: #333;
+      }
+      #container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      }
+      #video {
+        width: 100%;
+        height: auto;
+        border: 2px solid #333;
+        border-radius: 5px;
+      }
+      #folder-input {
+        width: 100%;
+        padding: 10px;
+        margin: 10px 0;
+        border: 2px solid #333;
+        border-radius: 5px;
+      }
+      #capture-button,
+      #download-button {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+      #capture-button:hover,
+      #download-button:hover {
+        background-color: #555;
+      }
+      @media (max-width: 600px) {
+        #container {
+          padding: 10px;
+        }
+        #video {
+          border: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Real-time Picture Capture with Folders</h1>
+      <div id="message" style="display: none"></div>
+      <video id="video" autoplay></video>
+      <input type="text" id="folder-input" placeholder="Enter folder name" />
+      <button id="capture-button">Capture</button>
+      <button id="download-button">Download Folders as Zip</button>
+      <button id="share-button">Share on WhatsApp</button>
+    </div>
+
+    <!-- <script src="jszip.min.js"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"
+      integrity="sha512-XMVd28F1oH/O71fzwBnV7HucLxVwtxf26XV8P4wPk26EDxuGZ91N8bsOttmnomcCD3CS5ZMRL50H0GgOHvegtg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <!-- <script src="FileSaver.min.js"></script> -->
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js"
+      integrity="sha512-csNcFYJniKjJxRWRV1R7fvnXrycHP6qDR21mgz1ZP55xY5d+aHLfo9/FcGDQLfn2IfngbAHd8LdfsagcCqgTcQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script>
+      const pictures = {};
+      const video = document.getElementById("video");
+      const captureButton = document.getElementById("capture-button");
+      const downloadButton = document.getElementById("download-button");
+      const folderInput = document.getElementById("folder-input");
+      const message = document.getElementById("message");
+
+      // Function to capture and store a picture
+      function capturePicture() {
+        const folderName = folderInput.value || "Default";
+        if (!pictures[folderName]) {
+          pictures[folderName] = [];
+        }
+
+        const canvas = document.createElement("canvas");
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas
+          .getContext("2d")
+          .drawImage(video, 0, 0, canvas.width, canvas.height);
+        const pictureDataUrl = canvas.toDataURL("image/png");
+        pictures[folderName].push(pictureDataUrl);
+
+        showMessage("Picture captured!");
+      }
+
+      captureButton.addEventListener("click", capturePicture);
+
+      // Function to download folders as a zip file
+      function downloadFoldersAsZip() {
+        const zip = new JSZip();
+
+        for (const folderName in pictures) {
+          const folder = zip.folder(folderName);
+          pictures[folderName].forEach((picture, index) => {
+            folder.file(`picture${index}.png`, picture.split(",")[1], {
+              base64: true,
+            });
+          });
+        }
+
+        zip.generateAsync({ type: "blob" }).then((blob) => {
+          saveAs(blob, "folders.zip");
+        });
+      }
+
+      downloadButton.addEventListener("click", downloadFoldersAsZip);
+
+      // Function to share the zip file on WhatsApp using the Web Share API
+      function shareOnWhatsApp() {
+            if (navigator.share) {
+                const zipBlob = generateZipBlob(); // Replace this with the function that generates the zip blob
+                navigator.share({
+                    files: [new File([zipBlob], 'folders.zip')],
+                })
+                .then(() => console.log('Shared successfully!'))
+                .catch((error) => console.error('Error sharing:', error));
+            } else {
+                alert('Web Share API is not supported on this browser. You can manually share the zip file.');
+            }
+        }
+
+        document.getElementById('share-button').addEventListener('click', shareOnWhatsApp);
+
+      // Show a message with the specified text
+      function showMessage(text) {
+        message.innerText = text;
+        message.style.display = "block";
+        setTimeout(() => {
+          message.style.display = "none";
+        }, 3000); // Hide the message after 3 seconds
+      }
+
+      // Access the user's camera and display the video stream
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+        })
+        .catch((error) => {
+          console.error("Error accessing the camera:", error);
+        });
+    </script>
+  </body>
+</html>

@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
@@ -206,10 +207,15 @@ function capturePicture() {
         .getUserMedia({ video: { facingMode: 'environment' }})
         .then((stream) => {
           video.srcObject = stream;
+           video.play();
         })
         .catch((error) => {
           console.error("Error accessing the camera:", error);
         });
+
+      video.addEventListener('error', (e) => {
+  console.error('Video error:', e);
+});
     </script>
   </body>
 </html>
